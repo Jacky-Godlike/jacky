@@ -2,7 +2,7 @@
 pos_x = 0
 pos_y = 0
 battery = 100
-
+movement = 0
 #class记录轨迹
 class Path:
     def __init__(self,x=0,y=0,z=100):
@@ -43,6 +43,7 @@ def move():
         pos_x -= 1
         battery -= 10
         if barr_check() and edge_check() and battery_check():
+            movement += 1
             pass
         else:
             pos_x += 1
@@ -53,6 +54,7 @@ def move():
         pos_x += 1
         battery -= 10
         if barr_check() and edge_check() and battery_check():
+            movement += 1
             pass
         else:
             pos_x -= 1
@@ -63,6 +65,7 @@ def move():
         pos_y += 1
         battery -= 10
         if barr_check() and edge_check() and battery_check():
+            movement += 1
             pass
         else:
             pos_y -= 1
@@ -73,6 +76,7 @@ def move():
         pos_y -= 1
         battery -= 10
         if barr_check() and edge_check() and battery_check():
+            movement += 1
             pass
         else:
             pos_y += 1
@@ -88,6 +92,10 @@ def move():
         return 0
 
     elif action == "h":  # 操作 h (提示)
+        print("press a, s, w, d to move")
+        print("press c to recharge")
+        print("press h to help")
+        print("press q to quit")
         manhattan_distance = 8 - pos_x - pos_y# 计算曼哈顿距离判断剩余电量
         if manhattan_distance * 10 > battery:
             print("You can't reach the destination without charging!")
@@ -120,5 +128,6 @@ while pos_x != 4 or pos_y != 4:
 if pos_x == 4 and pos_y == 4:
     print(f"You have successfully reached destination(4,4)!")
     print(f"Left Battery : {battery}%")
+print(f"successful movement:"{movement})
 print("Your path :",track.point)
 
