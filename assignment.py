@@ -1,66 +1,93 @@
-pos_x = 0
-pos_y = 0
-battery = 100
+## 定义一个 Robot class 
+class Robot:
+    def __init__(self, x=0, y=0, battery=100):
+        self.x = x
+        self.y = y
+        self.battery = battery
 
-#下面的这个我打算用来判断是否是喷到了障碍，但在下方操作代码中还没有加。
-#(2,1)和(2,2)是障碍，小车的位置不能在这两点
-def pos_check():
-    if pos_x == 2 and pos_y == 1:
-        return False
-    elif pos_x == 2 and pos_y == 2:
-        return False
-    else:
+    def pos_check(self, next_x, next_y):
+        # 检查下一个位置是否是障碍物：(2,1) 和 (2,2)
+        if (next_x == 2 and next_y == 1) or (next_x == 2 and next_y == 2):
+            return False
         return True
 
-#小车移动代码
-while pos_x < 4 or pos_y < 4:
-    print(f"position now :({pos_x},{pos_y})")
-    print(f"battery now :{battery}%")
+# 初始数据与实例化小车
+my_robot = Robot(0, 0, 100)
+Destination = (4, 4)
+
+# 小车移动代码
+while my_robot.x < 4 or my_robot.y < 4:
+    print(f"position now :({my_robot.x},{my_robot.y})")
+    print(f"battery now :{my_robot.battery}%")
+    
     origin_action = input("Please enter next step :")
     action = origin_action.lower()
-    if action == "a":#操作a
-        if pos_x == 0:
-            print("Invalid action")
-        else:
-            pos_x = pos_x - 1
-            battery = battery - 10
+    
+    # 记录移动前的坐标，用于后面判断是否撞到障碍
+    next_x, next_y = my_robot.x, my_robot.y
+    moved = False
 
-    elif action == "d":#操作d
-        if pos_x == 4:
+    if action == "a":  # 操作 a (向左)
+        if my_robot.x == 0:
             print("Invalid action")
         else:
-            pos_x = pos_x + 1
-            battery = battery - 10
-    elif action == "w":#操作w
-        if pos_y == 4:
+            next_x = my_robot.x - 1
+            moved = True
+
+    elif action == "d":  # 操作 d (向右)
+        if my_robot.x == 4:
             print("Invalid action")
         else:
-            pos_y = pos_y + 1
-            battery = battery - 10
-    elif action == "s":#操作s
-        if pos_y == 0:
+            next_x = my_robot.x + 1
+            moved = True
+
+    elif action == "w":  # 操作 w (向上)
+        if my_robot.y == 4:
             print("Invalid action")
         else:
-            pos_y = pos_y - 1
-            battery = battery - 10
-    elif action == "c":#操作c
-        battery = 100
+            next_y = my_robot.y + 1
+            moved = True
+
+    elif action == "s":  # 操作 s (向下)
+        if my_robot.y == 0:
+            print("Invalid action")
+        else:
+            next_y = my_robot.y - 1
+            moved = True
+
+    elif action == "c":  # 操作 c (充电)
+        my_robot.battery = 100
         print("Battery has been fully charged.")
-    elif action == "h":#操作h
-        if 8 - (pos_x + pos_y) > (battery/10):#检测剩余电量是否支持最优路线到达终点，不行的话就告诉用户需要充电
+
+    elif action == "h":  # 操作 h (电量检查)
+        # 计算曼哈顿距离判断剩余电量
+        remaining_distance = (4 - my_robot.x) + (4 - my_robot.y)
+        if remaining_distance * 10 > my_robot.battery:
             print("You can not reach destination without charging.")
         else:
             print("You can reach destination without charging by applying the shortest way.")
-    elif action == "q":#操作q
+
+    elif action == "q":  # 操作 q (退出)
         print("You have quit the movement.")
-        print(f"Final position :({pos_x},{pos_y})")
-        print(f"Left Battery : {battery}%")
+        print(f"Final position :({my_robot.x},{my_robot.y})")
+        print(f"Left Battery : {my_robot.battery}%")
         break
+
     else:
         print("Invalid action")
-    print("------------------------------")
 
-#结局
-if pos_x == 4 and pos_y == 4:
+    # 如果触发了有效移动方向，进行障碍检查和电量扣除
+    if moved:
+        if not my_robot.pos_check(next_x, next_y):
+            print("Obstacle ahead! Movement blocked.")
+        else:
+            my_robot.x = next_x
+            my_robot.y = next_y
+            my_robot.battery -= 10
+
+    print("------------------------------")
+    
+# 结局
+if my_robot.x == 4 and my_robot.y == 4:
     print(f"You have successfully reached destination(4,4)!")
-    print(f"Left Battery : {battery}%")
+    print(f"Left Battery : {my_robot.battery}%")
