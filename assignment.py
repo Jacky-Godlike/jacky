@@ -1,8 +1,8 @@
 
-pos_x = int(0)
-pos_y = int(0)
-battery = int(100)
-movement = int(0)
+pos_x = 0
+pos_y = 0
+battery = 100
+movement = 0
 
 #下面的这个我打算用来判断是否遇到障碍或电池耗尽d
 #(2,1)和(2,2)是障碍，小车的位置不能在这两点
