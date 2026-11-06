@@ -38,7 +38,7 @@ def battery_check():
 #行动函数
 def move():
     action = input("Please enter your action: ").lower()
-    global pos_x, pos_y, battery
+    global pos_x, pos_y, battery, movement
     if action == "a":  # 操作 a (向左)
         pos_x -= 1
         battery -= 10
