@@ -2,14 +2,16 @@
 pos_x = int(0)
 pos_y = int(0)
 battery = int(100)
-movement=int(0)
+movement = int(0)
 
-#下面的这个我打算用来判断是否是喷到了障碍，但在下方操作代码中还没有加。
+#下面的这个我打算用来判断是否遇到障碍或电池耗尽d
 #(2,1)和(2,2)是障碍，小车的位置不能在这两点
 def pos_check():
     if pos_x == 2 and pos_y == 1:
         return False
     elif pos_x == 2 and pos_y == 2:
+        return False
+    elif battery == 0:
         return False
     else:
         return True
@@ -18,6 +20,7 @@ def pos_check():
 while pos_x < 4 or pos_y < 4:
     print(f"position now :({pos_x},{pos_y})")
     print(f"battery now :{battery}%")
+    print()
     origin_action = input("Please enter next step :")
     action = origin_action.lower()
     if action == "a":#操作a
@@ -31,7 +34,10 @@ while pos_x < 4 or pos_y < 4:
                 movement += 1
             else:
                 pos_x += 1
-                print("across obstacle")
+                if battery == 0:
+                    print("battery is empty, please recharge")
+                else:
+                    print("across obstacle")
 
     elif action == "d":#操作d
         if pos_x == 4:
@@ -44,7 +50,10 @@ while pos_x < 4 or pos_y < 4:
                 movement += 1
             else:
                 pos_x -= 1
-                print("across obstacle")
+                if battery == 0:
+                    print("battery is empty, please recharge")
+                else:
+                    print("across obstacle")
 
     elif action == "w":#操作w
         if pos_y == 4:
@@ -57,7 +66,10 @@ while pos_x < 4 or pos_y < 4:
                 movement += 1
             else:
                 pos_y -= 1
-                print("across obstacle")
+                if battery == 0:
+                    print("battery is empty, please recharge")
+                else:
+                    print("across obstacle")
     elif action == "s":#操作s
         if pos_y == 0:
             print("Invalid action")
@@ -69,9 +81,12 @@ while pos_x < 4 or pos_y < 4:
                 movement += 1
             else:
                 pos_y += 1
-                print("across obstacle")
+                if battery == 0:
+                    print("battery is empty, please recharge")
+                else:
+                    print("across obstacle")
     elif action == "c":#操作c
-        if battery==100:
+        if battery == 100:
             print("already fully charged, valid")
         else:
             battery = 100
@@ -92,7 +107,6 @@ while pos_x < 4 or pos_y < 4:
     else:
         print("Invalid action")
     print("------------------------------")
-
 
 
 
