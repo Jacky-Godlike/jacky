@@ -1,0 +1,139 @@
+#初始数据
+Start = (0,0)
+Destination = (4,4)
+Battery = 100
+Cost = 10
+Size = 5          # 仓库是 5x5 的格子，坐标 0~4
+
+
+#定义一个Robot类，检查位置、方向、电磁
+class Robot:
+    def __init__(self , x , y):
+        self.x = x
+        self.y = y
+        self.Battery = Battery          # 改：initial_battery 没定义，用上面的 Battery
+        self.Path = [(x, y)]            # 记录走过的路径（P 功能用）
+        self.Moves = 0                  # 走了几步
+        self.Recharges = 0              # 充了几次电
+
+    def PosCheck(self):
+        if self.x == 2 and self.y == 1:
+            return False
+        elif self.x == 2 and self.y == 2:
+            return False
+        elif self.x < 0 or self.x >= Size or self.y < 0 or self.y >= Size:   # 加：不能走出仓库
+            return False
+        else:
+            return True
+
+    #定义方向
+    Direction = {
+        "W": (0, 1),  # up
+        "S": (0, -1),  # down
+        "A": (-1, 0),  # left
+        "D": (1, 0),  # right
+    }
+
+    # 改：移动的代码要放进一个方法里，不然 self 和 direction_key 都不存在
+    def Move(self, direction_key):
+        # 检查电量够不够
+        if self.Battery < Cost:
+            print("Battery too low! Press C to recharge.")
+            return
+
+        # 获取移动向量
+        dx, dy = self.Direction[direction_key]
+
+        self.x += dx
+        self.y += dy
+
+        # 撞到障碍物或出界就退回原位
+        if not self.PosCheck():
+            self.x -= dx
+            self.y -= dy
+            print("Blocked! Cannot move there.")
+            return
+
+        self.Battery -= Cost
+        self.Moves += 1
+        self.Path.append((self.x, self.y))
+        print("Moved to", (self.x, self.y), "| Battery:", str(self.Battery) + "%")
+
+    def Recharge(self):
+        self.Battery = 100
+        self.Recharges += 1
+        print("Battery recharged to 100%")
+
+    def show_map(self):
+        """Print the warehouse map."""
+        print("Warehouse map (R = robot, X = obstacle, D = destination):")
+        for y in range(Size - 1, -1, -1):          # 从上往下印，y 大的在上面
+            row = ""
+            for x in range(Size):
+                if (x, y) == (self.x, self.y):
+                    row += " R "
+                elif (x, y) == (2, 1) or (x, y) == (2, 2):
+                    row += " X "
+                elif (x, y) == Destination:
+                    row += " D "
+                elif (x, y) in self.Path:
+                    row += " * "
+                else:
+                    row += " . "
+            print(row)
+
+    def show_path(self):
+        """Print the path travelled."""
+        print("Path travelled:", " -> ".join(str(p) for p in self.Path))
+
+    def show_summary(self):
+        print("===== Final Summary =====")
+        print("Final position :", (self.x, self.y))
+        print("Battery left   :", str(self.Battery) + "%")
+        print("Total moves    :", self.Moves)
+        print("Recharges      :", self.Recharges)
+        if (self.x, self.y) == Destination:
+            print("Result         : Reached the destination!")
+        else:
+            print("Result         : Did not reach the destination.")
+
+    @staticmethod                       # 改：show_help 没有 self，要加 @staticmethod
+    def show_help():
+        """Print the list of commands."""
+        print("Commands:")
+        print("  W / S  - move up / down one cell")
+        print("  A / D  - move left / right one cell")
+        print("  C      - recharge battery to 100%")
+        print("  H      - show this help")
+        print("  Q      - quit and show final summary")
+        print("  M      - show warehouse map (extra feature)")
+        print("  P      - show path travelled (extra feature)")
+
+
+#主程序
+robot = Robot(Start[0], Start[1])
+print("Robot starts at", Start, "| Destination:", Destination, "| Battery:", str(robot.Battery) + "%")
+Robot.show_help()
+
+while True:
+    command = input("Enter command: ").strip().upper()
+
+    if command in Robot.Direction:
+        robot.Move(command)
+        if (robot.x, robot.y) == Destination:
+            print("Destination reached!")
+            break
+    elif command == "C":
+        robot.Recharge()
+    elif command == "H":
+        Robot.show_help()
+    elif command == "M":
+        robot.show_map()
+    elif command == "P":
+        robot.show_path()
+    elif command == "Q":
+        break
+    else:
+        print("Invalid command. Press H for help.")
+
+robot.show_summary()
