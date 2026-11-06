@@ -11,11 +11,11 @@ class Robot:
     def __init__(self , x , y):
         self.x = x
         self.y = y
-        self.Battery = Battery          # 改：initial_battery 没定义，用上面的 Battery
-        self.Path = [(x, y)]            # 记录走过的路径（P 功能用）
+        self.Battery = Battery          # 上面的 Battery
+        self.Path = [(x, y)]            # 记录走过的路径
         self.Moves = 0                  # 走了几步
         self.Recharges = 0              # 充了几次电
-
+    #检查有没有走错
     def PosCheck(self):
         if self.x == 2 and self.y == 1:
             return False
