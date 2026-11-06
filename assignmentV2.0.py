@@ -128,6 +128,6 @@ while pos_x != 4 or pos_y != 4:
 if pos_x == 4 and pos_y == 4:
     print(f"You have successfully reached destination(4,4)!")
     print(f"Left Battery : {battery}%")
-print(f"successful movement:"{movement})
+print(f"successful movement:{movement}")
 print("Your path :",track.point)
 
