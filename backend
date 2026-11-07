@@ -1,0 +1,82 @@
+GRID_SIZE = 5            # 地图 0~4
+GOAL = (4, 4)            # 终点
+OBSTACLES = {(2, 1), (2, 2)}
+COST = 10                # 每步耗电
+ 
+ 
+class Robot:
+    def __init__(self, x=0, y=0, battery=100):
+        self.x = x
+        self.y = y
+        self.battery = battery
+        self.movement = 0
+        self.path = [(x, y, battery)]   # 记录轨迹，起点
+ 
+    # 障碍检测
+    def barr_check(self, x, y):
+        if (x, y) in OBSTACLES:
+            print("Obstacle ahead!")
+            return False
+        return True
+ 
+    # 边界检测
+    def edge_check(self, x, y):
+        if not (0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE):
+            print("You can not cross the edge!")
+            return False
+        return True
+ 
+    # 电量检测：电量不够走一步就不能动
+    def battery_check(self):
+        if self.battery < COST:
+            print("You can not move, please charge your battery!")
+            return False
+        return True
+ 
+    # 行动：返回 1 表示退出，0 表示继续
+    def move(self, action):
+        if action == "q":
+            return 1
+ 
+        directions = {"a": (-1, 0), "d": (1, 0), "w": (0, 1), "s": (0, -1)}
+        if action not in directions:
+            print("Invalid action")
+            return 0
+ 
+        if not self.battery_check():
+            return 0
+ 
+        dx, dy = directions[action]
+        new_x, new_y = self.x + dx, self.y + dy
+ 
+        # 先检查目标格子是否合法，合法才真正移动
+        if self.edge_check(new_x, new_y) and self.barr_check(new_x, new_y):
+            self.x, self.y = new_x, new_y
+            self.battery -= COST
+            self.movement += 1
+            self.path.append((self.x, self.y, self.battery))
+        return 0
+ 
+ 
+robot = Robot()
+ 
+# 循环直到到达终点
+while (robot.x, robot.y) != GOAL:
+    print("---------------------")
+    print(f"Current position :({robot.x},{robot.y})")
+    print(f"Current battery :{robot.battery}%")
+ 
+    if robot.battery < COST:
+        print("Battery is empty, game over!")
+        break
+ 
+    action = input("Move (w/a/s/d, q to quit): ").strip().lower()
+    if robot.move(action) == 1:
+        break
+ 
+# 结局
+if (robot.x, robot.y) == GOAL:
+    print(f"You have successfully reached destination{GOAL}!")
+    print(f"Left Battery : {robot.battery}%")
+print(f"successful movement:{robot.movement}")
+print("Your path :", robot.path)
