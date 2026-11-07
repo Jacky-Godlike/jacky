@@ -1,116 +1,119 @@
-
-pos_x = 0
-pos_y = 0
-battery = 100
-movement = 0
-
-#下面的这个我打算用来判断是否遇到障碍或电池耗尽d
-#(2,1)和(2,2)是障碍，小车的位置不能在这两点
-def pos_check():
-    if pos_x == 2 and pos_y == 1:
-        return False
-    elif pos_x == 2 and pos_y == 2:
-        return False
-    elif battery == 0:
-        return False
-    else:
+GRID_SIZE = 5                     # 地图 0~4
+GOAL = (4, 4)                     # 终点
+OBSTACLES = {(2, 1), (2, 2)}      # 障碍
+COST = 10                         # 每步耗电
+FULL = 100                        # 满电
+ 
+HELP_TEXT = """Commands:
+  W - move up    (y + 1)
+  S - move down  (y - 1)
+  A - move left  (x - 1)
+  D - move right (x + 1)
+  C - charge battery to 100%
+  H - show this help
+  Q - quit"""
+ 
+ 
+class Robot:
+    def __init__(self, x=0, y=0, battery=FULL):
+        self.x = x
+        self.y = y
+        self.battery = battery
+        self.movement = 0
+        self.recharges = 0
+        self.path = [(x, y, battery)]   # 记录轨迹，起点
+ 
+    # 边界检测
+    def edge_check(self, x, y):
+        if not (0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE):
+            print("You can not cross the edge!")
+            return False
         return True
-
-#小车移动代码
-while pos_x < 4 or pos_y < 4:
-    print(f"position now :({pos_x},{pos_y})")
-    print(f"battery now :{battery}%")
-    print()
-    origin_action = input("Please enter next step :")
-    action = origin_action.lower()
-    if action == "a":#操作a
-        if pos_x == 0:
-            print("Invalid action")
+ 
+    # 障碍检测
+    def barr_check(self, x, y):
+        if (x, y) in OBSTACLES:
+            print("Obstacle ahead!")
+            return False
+        return True
+ 
+    # 电量检测：电量不够走一步就不能动
+    def battery_check(self):
+        if self.battery < COST:
+            print("You can not move, please charge your battery! (press C)")
+            return False
+        return True
+ 
+    # 充电：满电时不计数
+    def charge(self):
+        if self.battery >= FULL:
+            print("Battery is already full.")
         else:
-            pos_x -= 1
-            ready=pos_check()#检查是否遇到障碍
-            if ready==True:
-                battery -= 10
-                movement += 1
-            else:
-                pos_x += 1
-                if battery == 0:
-                    print("battery is empty, please recharge")
-                else:
-                    print("across obstacle")
-
-    elif action == "d":#操作d
-        if pos_x == 4:
-            print("Invalid action")
-        else:
-            pos_x += 1
-            ready = pos_check()  # 检查是否遇到障碍
-            if ready == True:
-                battery -= 10
-                movement += 1
-            else:
-                pos_x -= 1
-                if battery == 0:
-                    print("battery is empty, please recharge")
-                else:
-                    print("across obstacle")
-
-    elif action == "w":#操作w
-        if pos_y == 4:
-            print("Invalid action")
-        else:
-            pos_y += 1
-            ready = pos_check()  # 检查是否遇到障碍
-            if ready == True:
-                battery -= 10
-                movement += 1
-            else:
-                pos_y -= 1
-                if battery == 0:
-                    print("battery is empty, please recharge")
-                else:
-                    print("across obstacle")
-    elif action == "s":#操作s
-        if pos_y == 0:
-            print("Invalid action")
-        else:
-            pos_y -= 1
-            ready = pos_check()  # 检查是否遇到障碍
-            if ready == True:
-                battery -= 10
-                movement += 1
-            else:
-                pos_y += 1
-                if battery == 0:
-                    print("battery is empty, please recharge")
-                else:
-                    print("across obstacle")
-    elif action == "c":#操作c
-        if battery == 100:
-            print("already fully charged, valid")
-        else:
-            battery = 100
-            print("Battery has been fully charged.")
-    elif action == "h":#操作h
-        print("battery stage: ",battery)
-        print("position now: ",(pos_x,pos_y))
-        print("successful movement: ",movement)
-        print("press a, s, w, d to move")
-        print("press c to recharge")
-        print("press h to help")
-        print("press q to quit")
-    elif action == "q":#操作q
-        print("You have quit the movement.")
-        print(f"Final position :({pos_x},{pos_y})")
-        print(f"Left Battery : {battery}%")
+            self.battery = FULL
+            self.recharges += 1
+            print("Battery charged to 100%.")
+ 
+    # 显示当前状态
+    def show_status(self):
+        print("---------------------")
+        print(f"Current position :({self.x},{self.y})")
+        print(f"Current battery :{self.battery}%")
+        print(f"Successful moves :{self.movement}")
+        print(f"Recharges :{self.recharges}")
+ 
+    # 最终总结，无论哪种方式结束都调用
+    def show_summary(self):
+        delivered = (self.x, self.y) == GOAL
+        print("========== Summary ==========")
+        print(f"Final position :({self.x},{self.y})")
+        print(f"Battery :{self.battery}%")
+        print(f"Successful moves :{self.movement}")
+        print(f"Recharges :{self.recharges}")
+        print(f"Status :{'Delivered' if delivered else 'Not delivered'}")
+        print("Your path :", self.path)
+ 
+    # 处理一条指令：返回 1 表示退出，0 表示继续
+    def move(self, action):
+        if action == "":
+            print("You entered nothing. Press H to see all commands.")
+            return 0
+        if action == "q":
+            return 1
+        if action == "h":
+            print(HELP_TEXT)
+            return 0
+        if action == "c":
+            self.charge()
+            return 0
+ 
+        directions = {"a": (-1, 0), "d": (1, 0), "w": (0, 1), "s": (0, -1)}
+        if action not in directions:
+            print(f"Invalid command '{action}'. Press H to see all commands.")
+            return 0
+ 
+        dx, dy = directions[action]
+        new_x, new_y = self.x + dx, self.y + dy
+ 
+        # 检查顺序：边界 → 障碍 → 电量（短路求值保证只提示第一个失败项）
+        if (self.edge_check(new_x, new_y)
+                and self.barr_check(new_x, new_y)
+                and self.battery_check()):
+            self.x, self.y = new_x, new_y
+            self.battery -= COST
+            self.movement += 1
+            self.path.append((self.x, self.y, self.battery))
+        return 0
+ 
+ 
+robot = Robot()
+ 
+# 只在送达或按 Q 时结束
+while (robot.x, robot.y) != GOAL:
+    robot.show_status()
+    action = input("Command (w/a/s/d/c/h/q): ").strip().lower()
+    if robot.move(action) == 1:
         break
-    else:
-        print("Invalid action")
-    print("------------------------------")
-
-
-
-#结局
-if pos_x == 4 and pos_y == 4:
-    print(f"You have successfully reached destination(4,4)!")
-    print(f"Left Battery : {battery}%")
+ 
+if (robot.x, robot.y) == GOAL:
+    print(f"You have successfully reached destination{GOAL}!")
+robot.show_summary()
